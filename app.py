@@ -35,7 +35,8 @@ def is_emergency_query(query: str) -> bool:
     emergency_keywords = [
         "heart attack", "stroke", "can't breathe", "cannot breathe", 
         "choking", "unconscious", "suicide", "kill myself", 
-        "coughing blood", "vomiting blood", "overdose", "poison"
+        "coughing blood", "vomiting blood", "overdose", "poison",
+        "dying", "die", "bleeding out"
     ]
     return any(word in query.lower() for word in emergency_keywords)
 
@@ -47,7 +48,7 @@ def is_safe_medical_query(query: str) -> bool:
         
     # Require the query to be related to symptoms or health
     medical_keywords = [
-        "pain", "hurt", "feel", "ache", "dizzy", "blood", "doctor", 
+        "pain", "hurt", "feel", "ache", "dizzy", "blood", "bleed", "bleeding", "doctor", 
         "symptom", "fever", "sick", "swollen", "slow", "head", "chest", 
         "cough", "muscle"
     ]
