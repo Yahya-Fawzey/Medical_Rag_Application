@@ -4,7 +4,7 @@ langchain-community==0.3.0
 langchain-huggingface==0.1.0
 sentence-transformers==3.1.0
 chromadb==0.5.5
---extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
-llama-cpp-python==0.2.90
 pandas==2.2.2
 huggingface-hub
+--extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
+llama-cpp-python==0.2.90
