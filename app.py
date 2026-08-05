@@ -31,12 +31,12 @@ st.button("🎲 Load Test Example", on_click=set_random_query)
 
 # 3. Guardrail Functions (Cascading Filters)
 def is_emergency_query(query: str) -> bool:
-    # Trigger an immediate hard-stop for critical life-threatening keywords
+    # Trigger an immediate hard-stop for critical life-threatening or severe symptoms
     emergency_keywords = [
         "heart attack", "stroke", "can't breathe", "cannot breathe", 
         "choking", "unconscious", "suicide", "kill myself", 
         "coughing blood", "vomiting blood", "overdose", "poison",
-        "dying", "die", "bleeding out"
+        "dying", "die", "bleeding out", "bleed", "bleeding"
     ]
     return any(word in query.lower() for word in emergency_keywords)
 
@@ -46,9 +46,9 @@ def is_safe_medical_query(query: str) -> bool:
     if any(word in query.lower() for word in injection_keywords):
         return False
         
-    # Require the query to be related to symptoms or health
+    # Require the query to be related to general symptoms or health
     medical_keywords = [
-        "pain", "hurt", "feel", "ache", "dizzy", "blood", "bleed", "bleeding", "doctor", 
+        "pain", "hurt", "feel", "ache", "dizzy", "blood", "doctor", 
         "symptom", "fever", "sick", "swollen", "slow", "head", "chest", 
         "cough", "muscle"
     ]
@@ -59,10 +59,10 @@ user_query = st.text_input("Describe your symptoms below:", value=st.session_sta
 
 if st.button("Analyze Symptoms") and user_query:
     
-    # Filter 1: Critical Emergency Check
+    # Filter 1: Critical Emergency / Serious Symptom Check
     if is_emergency_query(user_query):
         st.markdown(
-            "<h3 style='color: red;'>🚨 EMERGENCY: Call emergency services (123) now! Do not wait for an AI diagnosis.</h3>", 
+            "<h3 style='color: red;'>🚨 URGENT: Please seek immediate medical attention or call emergency services (123). Do not rely on AI triage for bleeding or severe symptoms.</h3>", 
             unsafe_allow_html=True
         )
         
