@@ -29,48 +29,45 @@ def set_random_query():
 st.markdown("**Quick Test:**")
 st.button("🎲 Load Test Example", on_click=set_random_query)
 
-# 3. Guardrail Functions (Cascading Filters)
+# 3. Smart Filtering Layers
 def is_emergency_query(query: str) -> bool:
-    # Trigger an immediate hard-stop for critical life-threatening or severe symptoms
     emergency_keywords = [
-        "heart attack", "stroke", "can't breathe", "cannot breathe", 
-        "choking", "unconscious", "suicide", "kill myself", 
-        "coughing blood", "vomiting blood", "overdose", "poison",
-        "dying", "die", "bleeding out", "bleed", "bleeding"
+        "chest pain", "heart attack", "can't breathe", "cannot breathe",
+        "difficulty breathing", "severe bleeding", "unconscious", "suicide",
+        "suicidal", "kill myself", "overdose", "stroke", "seizure",
+        "loss of consciousness", "not breathing", "stopped breathing",
+        "severe head injury", "anaphylaxis", "allergic reaction",
+        "ألم في الصدر", "نزيف حاد", "لا أستطيع التنفس", "انتحار"
     ]
-    return any(word in query.lower() for word in emergency_keywords)
+    q_lower = query.lower()
+    return any(kw in q_lower for kw in emergency_keywords)
 
-def is_safe_medical_query(query: str) -> bool:
-    # Block common prompt injection attempts
-    injection_keywords = ["ignore", "system prompt", "instructions", "bypass", "rule", "developer"]
-    if any(word in query.lower() for word in injection_keywords):
-        return False
-        
-    # Require the query to be related to general symptoms or health
-    medical_keywords = [
-        "pain", "hurt", "feel", "ache", "dizzy", "blood", "doctor", 
-        "symptom", "fever", "sick", "swollen", "slow", "head", "chest", 
-        "cough", "muscle"
+def is_out_of_scope(query: str) -> bool:
+    # Catches non-medical prompts like recipes, coding, etc.
+    unrelated_topics = [
+        "recipe", "cook", "food", "python", "code", "movie", 
+        "game", "football", "weather", "javascript", "sql", "bake"
     ]
-    return any(word in query.lower() for word in medical_keywords)
+    q_lower = query.lower()
+    return any(topic in q_lower for topic in unrelated_topics)
 
 # 4. User Input & Execution Flow
 user_query = st.text_input("Describe your symptoms below:", value=st.session_state.demo_query)
 
 if st.button("Analyze Symptoms") and user_query:
     
-    # Filter 1: Critical Emergency / Serious Symptom Check
+    # Check 1: Immediate Emergency Warning
     if is_emergency_query(user_query):
         st.markdown(
-            "<h3 style='color: red;'>🚨 URGENT: Please seek immediate medical attention or call emergency services (123). Do not rely on AI triage for bleeding or severe symptoms.</h3>", 
+            "<h3 style='color: red;'>🚨 URGENT: Please seek immediate medical attention or call emergency services (123). Do not rely on AI triage for critical conditions.</h3>", 
             unsafe_allow_html=True
         )
         
-    # Filter 2: Standard Safety & Injection Layer
-    elif not is_safe_medical_query(user_query):
-        st.error("⚠️ **Blocked:** Please restrict queries to medical symptoms. System prompt instructions cannot be modified.")
+    # Check 2: Relevance / Out-of-Scope Check (e.g., recipes, programming)
+    elif is_out_of_scope(user_query):
+        st.error("⚠️ **Not Relevant:** This is a medical symptom checker. Please enter health-related queries or symptoms rather than non-medical topics.")
     
-    # Filter 3: Clean ML Inference
+    # Check 3: Let the ML Pipeline / AI Handle Everything Else
     else:
         with st.spinner("Analyzing clinical datasets..."):
             rag_answer = answer_func(user_query)
