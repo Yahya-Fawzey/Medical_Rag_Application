@@ -29,7 +29,16 @@ def set_random_query():
 st.markdown("**Quick Test:**")
 st.button("🎲 Load Test Example", on_click=set_random_query)
 
-# 3. Input Guardrail Function
+# 3. Guardrail Functions (Cascading Filters)
+def is_emergency_query(query: str) -> bool:
+    # Trigger an immediate hard-stop for critical life-threatening keywords
+    emergency_keywords = [
+        "heart attack", "stroke", "can't breathe", "cannot breathe", 
+        "choking", "unconscious", "suicide", "kill myself", 
+        "coughing blood", "vomiting blood", "overdose", "poison"
+    ]
+    return any(word in query.lower() for word in emergency_keywords)
+
 def is_safe_medical_query(query: str) -> bool:
     # Block common prompt injection attempts
     injection_keywords = ["ignore", "system prompt", "instructions", "bypass", "rule", "developer"]
@@ -42,20 +51,26 @@ def is_safe_medical_query(query: str) -> bool:
         "symptom", "fever", "sick", "swollen", "slow", "head", "chest", 
         "cough", "muscle"
     ]
-    
     return any(word in query.lower() for word in medical_keywords)
 
-# 4. User Input & Execution
+# 4. User Input & Execution Flow
 user_query = st.text_input("Describe your symptoms below:", value=st.session_state.demo_query)
 
 if st.button("Analyze Symptoms") and user_query:
     
-    # The Safety Layer triggers first!
-    if not is_safe_medical_query(user_query):
+    # Filter 1: Critical Emergency Check
+    if is_emergency_query(user_query):
+        st.markdown(
+            "<h3 style='color: red;'>🚨 EMERGENCY: Call emergency services (123) now! Do not wait for an AI diagnosis.</h3>", 
+            unsafe_allow_html=True
+        )
+        
+    # Filter 2: Standard Safety & Injection Layer
+    elif not is_safe_medical_query(user_query):
         st.error("⚠️ **Blocked:** Please restrict queries to medical symptoms. System prompt instructions cannot be modified.")
     
+    # Filter 3: Clean ML Inference
     else:
-        # Only run the heavy ML inference pipeline if the query passes the safety check
         with st.spinner("Analyzing clinical datasets..."):
             rag_answer = answer_func(user_query)
             st.write(rag_answer)
