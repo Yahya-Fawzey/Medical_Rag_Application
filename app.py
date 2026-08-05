@@ -1,3 +1,4 @@
+import random
 import streamlit as st
 from rag_pipeline import create_rag_chain
 
@@ -11,21 +12,22 @@ answer_func = load_chain()
 st.title("Medical Symptom RAG Checker")
 
 # 1. The UI Safety Disclaimer
-st.warning("⚠️ **Disclaimer:** This AI triage system is for educational demonstration only and is not a substitute for professional medical diagnosis.")
+st.warning("⚠️ **Disclaimer:** This AI triage system analyzes symptoms to suggest potential conditions, but it does not replace professional medical advice. This tool does not compensate for a real clinical diagnosis—please visit a doctor if you feel unwell or require medical attention.")
 
-# 2. Demo Buttons State Handler
+# 2. Random Demo Button State Handler
 if 'demo_query' not in st.session_state:
     st.session_state.demo_query = ""
 
-def set_query(text):
-    st.session_state.demo_query = text
+def set_random_query():
+    prompts = [
+        "I feel slow, my head is spinning, and I have a severe throbbing pain.",
+        "I have a pounding headache, chest pain, and I feel dizzy.",
+        "I have a severe dry cough, a high fever, and my muscles ache all over."
+    ]
+    st.session_state.demo_query = random.choice(prompts)
 
-st.markdown("**Quick Test Prompts:**")
-col1, col2 = st.columns(2)
-with col1:
-    st.button("Test: Migraine", on_click=set_query, args=("I feel slow, my head is spinning, and I have a severe throbbing pain.",))
-with col2:
-    st.button("Test: Hypertension", on_click=set_query, args=("I have a pounding headache, chest pain, and I feel dizzy.",))
+st.markdown("**Quick Test:**")
+st.button("🎲 Load Test Example", on_click=set_random_query)
 
 # 3. Input Guardrail Function
 def is_safe_medical_query(query: str) -> bool:
@@ -35,7 +37,11 @@ def is_safe_medical_query(query: str) -> bool:
         return False
         
     # Require the query to be related to symptoms or health
-    medical_keywords = ["pain", "hurt", "feel", "ache", "dizzy", "blood", "doctor", "symptom", "fever", "sick", "swollen", "slow", "head", "chest"]
+    medical_keywords = [
+        "pain", "hurt", "feel", "ache", "dizzy", "blood", "doctor", 
+        "symptom", "fever", "sick", "swollen", "slow", "head", "chest", 
+        "cough", "muscle"
+    ]
     
     return any(word in query.lower() for word in medical_keywords)
 
