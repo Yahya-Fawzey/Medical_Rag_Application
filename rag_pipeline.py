@@ -31,7 +31,7 @@ def get_vectorstore():
 def get_llm():
     # Downloads the model directly to the cloud server on boot
     model_path = hf_hub_download(
-        repo_id="feihu/Qwen2.5-0.5B-Instruct-GGUF",
+        repo_id="Qwen/Qwen2.5-0.5B-Instruct-GGUF",
         filename="qwen2.5-0.5b-instruct-q4_k_m.gguf"
     )
     
