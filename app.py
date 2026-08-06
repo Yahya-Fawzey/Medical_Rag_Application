@@ -1,6 +1,7 @@
 import random
 import streamlit as st
 from rag_pipeline import create_rag_chain
+import re
 
 # Initialize the RAG chain and cache it to prevent reloading
 @st.cache_resource
@@ -30,26 +31,67 @@ st.markdown("**Quick Test:**")
 st.button("🎲 Load Test Example", on_click=set_random_query)
 
 # 3. Smart Filtering Layers
+def _normalize(text: str) -> str:
+    text = text.lower()
+    text = re.sub(r"[^\w\s'ء-ي]", " ", text)  
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
 def is_emergency_query(query: str) -> bool:
     emergency_keywords = [
+        # cardiac / respiratory
         "chest pain", "heart attack", "can't breathe", "cannot breathe",
         "cant breath", "cant breathe", "breath correctly", "breathe correctly",
-        "difficulty breathing", "severe bleeding", "heavy bleeding", "bleeding heavily",
-        "bleeding a lot", "bleed", "bleeding", "i'm bleeding", "im bleeding", 
-        "bleeding out", "unconscious", "suicide", "suicidal", "kill myself", 
-        "overdose", "stroke", "seizure", "loss of consciousness", "not breathing", 
-        "stopped breathing", "severe head injury", "anaphylaxis", "allergic reaction",
-        "ألم في الصدر", "نزيف حاد", "لا أستطيع التنفس", "انتحار"
+        "difficulty breathing", "not breathing", "stopped breathing",
+        "gasping for air", "cant catch my breath", "cant catch breath",
+        "tightness in my chest", "crushing chest pain",
+
+        # bleeding / trauma
+        "severe bleeding", "heavy bleeding", "bleeding heavily", "bleeding a lot",
+        "won't stop bleeding", "wont stop bleeding", "i'm bleeding", "im bleeding",
+        "bleeding out", "severe head injury", "deep wound", "coughing up blood",
+        "vomiting blood",
+
+        # neuro
+        "stroke", "seizure", "unconscious", "loss of consciousness",
+        "passed out", "not waking up", "unresponsive", "slurred speech",
+        "face is drooping", "cant feel my", "can't feel my", "cant move my",
+        "can't move my",
+
+        # allergic / toxic
+        "anaphylaxis", "allergic reaction", "throat closing", "overdose",
+        "poisoned", "poisoning", "swallowed something",
+
+        # self-harm / crisis
+        "suicide", "suicidal", "kill myself", "want to die", "end my life",
+        "hurting myself", "self harm", "self-harm",
+
+        # generic distress catch-alls — deliberately broad, false positives are cheap here
+        "im dying", "i'm dying", "dying right now", "call 911", "call an ambulance",
+        "need an ambulance", "this is an emergency", "help me now",
+
+        # Arabic
+        "ألم في الصدر", "نزيف حاد", "لا أستطيع التنفس", "انتحار",
+        "فقدان الوعي", "سكتة دماغية", "نوبة قلبية", "لا أستطيع الحركة",
     ]
-    q_lower = query.lower()
-    return any(kw in q_lower for kw in emergency_keywords)
+    q = _normalize(query)
+    return any(kw in q for kw in emergency_keywords)
 
 def is_out_of_scope(query: str) -> bool:
     unrelated_topics = [
-        "recipe", "cook", "food", "python", "code", "movie", 
-        "game", "football", "weather", "javascript", "sql", "bake"
+        "recipe", "cooking tips", "how to cook", "python", "code", "coding",
+        "movie", "tv show", "game", "video game", "football", "soccer",
+        "weather forecast", "javascript", "sql", "bake", "baking",
+        "stock price", "crypto", "bitcoin", "song", "lyrics", "math homework",
+    ]
+    medical_exceptions = [
+        "food poisoning", "food allergy", "food allergic", "allergic to food",
     ]
     q_lower = query.lower()
+
+    if any(exc in q_lower for exc in medical_exceptions):
+        return False
+
     return any(topic in q_lower for topic in unrelated_topics)
 
 # 4. User Input & Execution Flow
