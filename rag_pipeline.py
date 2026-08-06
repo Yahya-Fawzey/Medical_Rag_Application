@@ -29,7 +29,6 @@ def get_vectorstore():
     return vectorstore
 
 def get_llm():
-    # Downloads the model directly to the cloud server on boot
     model_path = hf_hub_download(
         repo_id="Qwen/Qwen2.5-0.5B-Instruct-GGUF",
         filename="qwen2.5-0.5b-instruct-q4_k_m.gguf"
@@ -38,10 +37,9 @@ def get_llm():
     return LlamaCpp(
         model_path=model_path,
         temperature=0.0,
-        n_ctx=2048,
-        n_batch=512,
+        n_ctx=512,      # Lowered from 2048 to save RAM
+        n_batch=128,    # Lowered from 512
         verbose=False
-        # n_gpu_layers removed because Streamlit Cloud uses CPUs
     )
 
 def create_rag_chain():
