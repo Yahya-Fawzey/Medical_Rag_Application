@@ -79,13 +79,12 @@ def is_emergency_query(query: str) -> bool:
 
 def is_out_of_scope(query: str) -> bool:
     unrelated_topics = [
-        "recipe", "cooking tips", "how to cook", "python", "code", "coding",
-        "movie", "tv show", "game", "video game", "football", "soccer",
-        "weather forecast", "javascript", "sql", "bake", "baking",
-        "stock price", "crypto", "bitcoin", "song", "lyrics", "math homework",
+        "recipe", "cook", "food", "python", "code", "movie",
+        "game", "football", "weather", "javascript", "sql", "bake"
     ]
     medical_exceptions = [
         "food poisoning", "food allergy", "food allergic", "allergic to food",
+        "cant keep food down", "can't keep food down", "vomiting food",
     ]
     q_lower = query.lower()
 
