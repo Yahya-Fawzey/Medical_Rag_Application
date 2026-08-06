@@ -33,17 +33,18 @@ st.button("🎲 Load Test Example", on_click=set_random_query)
 def is_emergency_query(query: str) -> bool:
     emergency_keywords = [
         "chest pain", "heart attack", "can't breathe", "cannot breathe",
-        "difficulty breathing", "severe bleeding", "unconscious", "suicide",
-        "suicidal", "kill myself", "overdose", "stroke", "seizure",
-        "loss of consciousness", "not breathing", "stopped breathing",
-        "severe head injury", "anaphylaxis", "allergic reaction",
+        "cant breath", "cant breathe", "breath correctly", "breathe correctly",
+        "difficulty breathing", "severe bleeding", "heavy bleeding", "bleeding heavily",
+        "bleeding a lot", "bleed", "bleeding", "i'm bleeding", "im bleeding", 
+        "bleeding out", "unconscious", "suicide", "suicidal", "kill myself", 
+        "overdose", "stroke", "seizure", "loss of consciousness", "not breathing", 
+        "stopped breathing", "severe head injury", "anaphylaxis", "allergic reaction",
         "ألم في الصدر", "نزيف حاد", "لا أستطيع التنفس", "انتحار"
     ]
     q_lower = query.lower()
     return any(kw in q_lower for kw in emergency_keywords)
 
 def is_out_of_scope(query: str) -> bool:
-    # Catches non-medical prompts like recipes, coding, etc.
     unrelated_topics = [
         "recipe", "cook", "food", "python", "code", "movie", 
         "game", "football", "weather", "javascript", "sql", "bake"
